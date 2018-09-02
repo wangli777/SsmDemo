@@ -391,6 +391,7 @@
     });
     //新增模态框的保存操作
     $("#stu_add_saveBtn").click(function () {
+        //前端jquery校验
         if (!validate_add_form()){
             return false;
         }
@@ -404,11 +405,21 @@
             type:"POST",
             data:$("#stuAddModel form").serialize(),
             success:function (result) {
-                console.log(result.msg);
-                //保存成功后关闭模态框
-                $("#stuAddModel").modal('hide');
-                //跳转到最后一页
-                toPage(9999);
+                if (result.stutasCode==200) {
+                    console.log(result.msg);
+                    //保存成功后关闭模态框
+                    $("#stuAddModel").modal('hide');
+                    //跳转到最后一页
+                    toPage(9999);
+                }else if (result.stutasCode==500){
+                //    显示错误信息
+                    if(result.extend.massage.name!=undefined){
+                        show_validate_info("#stu_name_id","error",result.extend.massage.name);
+                    }
+                    if(result.extend.massage.email!=undefined){
+                        show_validate_info("#stu_email_id","error",result.extend.massage.email);
+                    }
+                }
             }
         });
     });

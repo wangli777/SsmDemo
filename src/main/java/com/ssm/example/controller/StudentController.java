@@ -7,15 +7,21 @@ import com.ssm.example.entity.Student;
 import com.ssm.example.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 /*
 * 使用RESTful风格的URI
-* /stu/{id} GET     查询学生
-* /stu/     POST    保存学生
-* /stu/{id} PUT     修改学生
-* /stu/{id} DELETE  删除学生*/
+* /stu/{id} GET     查询
+* /stu/     POST    保存
+* /stu/{id} PUT     修改
+* /stu/{id} DELETE  删除*/
 @Controller
 public class StudentController {
     @Autowired
@@ -41,9 +47,22 @@ public class StudentController {
     //以POST方式请求/stuList即为保存操作
     @RequestMapping(value = "/stu",method = RequestMethod.POST)
     @ResponseBody
-    public Msg saveStu(Student student){
-        service.saveStu(student);
-        return Msg.success();
+    public Msg saveStu(@Valid Student student, BindingResult result){
+        if (result.hasErrors()){
+            //检验失败
+            Map<String,Object> map = new HashMap<>();
+            List<FieldError> fieldErrors = result.getFieldErrors();
+            for (FieldError error: fieldErrors
+                 ) {
+                System.out.println("错误的字段:"+error.getField());
+                System.out.println("错误的字段信息:"+error.getDefaultMessage());
+                map.put(error.getField(), error.getDefaultMessage());
+            }
+            return Msg.fail().add("massage",map);
+        }else {
+            service.saveStu(student);
+            return Msg.success();
+        }
     }
     @RequestMapping(value = "/stu/{id}" ,method = RequestMethod.GET)
     @ResponseBody
